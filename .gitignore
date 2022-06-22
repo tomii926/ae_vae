@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# images folder
+images/
+
+# MNIST data
+MNIST/
+
+# trained network
+trained_net/
