@@ -1,15 +1,22 @@
 import torch
 from torchvision import transforms
+import os
 
 
 def device(device_num = 0):
     return torch.device(f"cuda:{device_num}" if torch.cuda.is_available() else "cpu")
 
 
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Lambda(lambda x: x.view(-1))])
+def mkdir_if_not_exists(dir_path):
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    return dir_path
 
 
-def net_path(epoch, nz=20, vae=False, multi_class=True):
-    return f"./trained_net/{'multi' if multi_class else 'False'}/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"
+def net_path(epoch, nz=20, vae=False, number=None):
+    if number is None: # multiple class
+        mkdir_if_not_exists('./trained_net/multi')
+        return f"./trained_net/multi/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"
+    else:  # single class
+        mkdir_if_not_exists(f'./trained_net/single/{number}')
+        return f"./trained_net/single/{number}/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"
