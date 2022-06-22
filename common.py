@@ -13,10 +13,11 @@ def mkdir_if_not_exists(dir_path):
     return dir_path
 
 
-def net_path(epoch, nz=20, vae=False, number=None):
-    if number is None: # multiple class
+def net_path(epoch, nz=20, vae=False, numbers=None):
+    if numbers is None: # multiple class
         mkdir_if_not_exists('./trained_net/multi')
         return f"./trained_net/multi/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"
     else:  # single class
-        mkdir_if_not_exists(f'./trained_net/single/{number}')
-        return f"./trained_net/single/{number}/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"
+        dir_name = '-'.join(str(n) for n in sorted(numbers))
+        mkdir_if_not_exists(f'./trained_net/single/{dir_name}')
+        return f"./trained_net/single/{dir_name}/{'v' if vae else ''}ae_z{nz:03d}_e{epoch+1:04d}.pth"

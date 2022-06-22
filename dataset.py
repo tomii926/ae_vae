@@ -11,14 +11,13 @@ transform = transforms.Compose([
 
 
 class SingleMNIST(Dataset):
-    def __init__(self, number, train=True):
+    def __init__(self, numbers, train=True):
         self.dataset = MNIST(root='.', train=train, transform=transform, download=True)
         dataloader = DataLoader(self.dataset, batch_size=64, shuffle=False, num_workers=2)
         now = 0
         self.indices = []
         for _, labels in tqdm(dataloader):
-            indices_to_add = np.where(labels.numpy() == number)[0] + now
-            self.indices += indices_to_add.tolist()
+            self.indices += [i for i, label in enumerate(labels, now) if label in numbers]
             now += len(labels)
 
     def __len__(self):
