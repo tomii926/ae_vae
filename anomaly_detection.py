@@ -31,8 +31,8 @@ if args.valid_nums is None:
 else:
     valid_nums = args.valid_nums
 
-valset = SingleMNIST(valid_nums, False)
-valloader = DataLoader(valset, batch_size=1, shuffle=False, num_workers=2)
+valset = SingleMNIST(valid_nums, True)
+valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
 
 if args.vae:
     net = VAE(args.nz)
@@ -43,7 +43,7 @@ net.eval()
 
 net.load_state_dict(torch.load(net_path(args.nepoch - 1, args.nz, args.vae, args.input_nums)))
 
-criterion = nn.MSELoss()
+criterion = nn.MSELoss(reduction='none')
 
 print('determining threshold...')
 
@@ -51,14 +51,14 @@ losses = []
 for images, label in tqdm(valloader):
     images = images.to(device)
     if args.vae:
-        kl, reconst = net.loss(images)
+        kl, reconst = net.losses(images)
         loss = kl + reconst
     else:
         output = net(images)
         loss = criterion(output, images)
-    losses.append(loss.item())
+    losses += loss.tolist()
     # print(loss.item())
-
+print(len(losses))
 losses.sort()
 threshold = losses[int(len(losses) * 0.9)]
 
@@ -80,7 +80,9 @@ for image, label in tqdm(testloader):
         loss = kl + reconst
     else:
         output = net(image)
-        loss = criterion(output, image).item()
+        loss = criterion(output, image)
+
+    loss = loss.item()
 
     # print(loss, label)
     if loss > threshold:
