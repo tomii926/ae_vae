@@ -2,17 +2,18 @@ import os
 from argparse import ArgumentParser
 from tokenize import Single
 
+import matplotlib as plt
+import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
-from torchvision.utils import save_image
+from torchvision.datasets import MNIST, FashionMNIST
+from torchvision.transforms import ToTensor
+from tqdm import tqdm
 
 from common import device, mkdir_if_not_exists, net_path
-from dataset import SingleMNIST, transform
+from dataset import SingleMNIST
 from net import AE, VAE
-import numpy as np
-from tqdm import tqdm
 
 device = device()
 
@@ -22,7 +23,8 @@ parser.add_argument('--nz', type=int, help='size of the latent z vector', defaul
 parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
 parser.add_argument('-v', '--valid-nums', type=int, nargs="*", help="which classes to use in determining threshold. if not specified, this will be the same as input-nums")
-parser.add_argument('--image-num', type=int, help="how many images to compare.", default=64)
+parser.add_argument('--kl', action="store_true", help="use only KL divergence when determining threshold.")
+parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.98)
 args = parser.parse_args()
 
 
@@ -47,49 +49,67 @@ criterion = nn.MSELoss(reduction='none')
 
 print('determining threshold...')
 
-losses = []
+all_losses = []
 for images, label in tqdm(valloader):
     images = images.to(device)
     if args.vae:
         kl, reconst = net.losses(images)
-        loss = kl + reconst
+        loss = reconst if args.kl else kl + reconst
     else:
         output = net(images)
-        loss = criterion(output, images)
-    losses += loss.tolist()
-    # print(loss.item())
-print(len(losses))
-losses.sort()
-threshold = losses[int(len(losses) * 0.9)]
+        loss = torch.sum(criterion(output, images), dim=(1, 2, 3))
+    all_losses += loss.tolist()
+
+all_losses.sort()
+threshold = all_losses[int(len(all_losses) * args.threshold)]
 
 print(f"threshold = {threshold}")
 
-testset = MNIST('.', train=False, download=True, transform=transform)
-testloader = DataLoader(testset, batch_size=1, shuffle=False, num_workers=2)
+testset = MNIST('.', train=False, download=True, transform=ToTensor())
+testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
 
 true_false_positive_case_num = [0] * 10
 num_num = [0] * 10
 
-
 print('calculating false/true positive rate...')
-for image, label in tqdm(testloader):
-    image = image.to(device)
-    label = label.item()
+for images, labels in tqdm(testloader):
+    images = images.to(device)
+    labels = labels.tolist()
     if args.vae:
-        kl, reconst = net.loss(image)
-        loss = kl + reconst
+        kl, reconst = net.losses(images)
+        losses = reconst if args.kl else kl + reconst
     else:
-        output = net(image)
-        loss = criterion(output, image)
+        output = net(images)
+        losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
 
-    loss = loss.item()
+    losses = losses.tolist()
 
-    # print(loss, label)
-    if loss > threshold:
-        true_false_positive_case_num[label] += 1
-    num_num[label] += 1
+    for loss, label in zip(losses, labels):
+        if loss > threshold:
+            true_false_positive_case_num[label] += 1
+        num_num[label] += 1
+
+fashionset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
+fashionloader = DataLoader(fashionset, batch_size=64, shuffle=False, num_workers=2)
+
+positive = 0
+for images, _ in tqdm(fashionloader):
+    images = images.to(device)
+    if args.vae:
+        kl, reconst = net.losses(images)
+        losses = reconst if args.kl else kl + reconst
+    else:
+        output = net(images)
+        losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
+
+    losses = losses.tolist()
+
+    for loss in losses:
+        if loss > threshold:
+            positive += 1
 
 true_false_positive_rates = np.array(true_false_positive_case_num)/np.array(num_num)
+true_false_positive_rates = np.append(true_false_positive_rates, positive/len(fashionset))
 print(true_false_positive_rates)
 
 

@@ -186,7 +186,7 @@ class VAE(nn.Module):
         KL = -0.5 * torch.sum(1 + logvar - mean**2 - logvar.exp(), dim=1)
         z = self._sample_z(mean, logvar)
         y = self._decoder(z)
-        reconstruction = torch.sum(F.binary_cross_entropy(y, x, reduction="none"), dim=1)
+        reconstruction = torch.sum(F.binary_cross_entropy(y, x, reduction="none"), dim=(1, 2, 3))
         return KL, reconstruction
 
 
