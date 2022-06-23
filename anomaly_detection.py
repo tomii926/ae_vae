@@ -1,8 +1,7 @@
 import os
 from argparse import ArgumentParser
-from tokenize import Single
 
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -24,7 +23,7 @@ parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
 parser.add_argument('-v', '--valid-nums', type=int, nargs="*", help="which classes to use in determining threshold. if not specified, this will be the same as input-nums")
 parser.add_argument('--kl', action="store_true", help="use only KL divergence when determining threshold.")
-parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.98)
+parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
 args = parser.parse_args()
 
 
@@ -111,6 +110,14 @@ for images, _ in tqdm(fashionloader):
 true_false_positive_rates = np.array(true_false_positive_case_num)/np.array(num_num)
 true_false_positive_rates = np.append(true_false_positive_rates, positive/len(fashionset))
 print(true_false_positive_rates)
+
+left = np.arange(0, 11)
+label = [str(i) for i in range(10)] + ["Fashion"]
+plt.bar(left, true_false_positive_rates, tick_label=label)
+input_name = '-'.join(str(n) for n in sorted(args.input_nums)) if args.input_nums else ''
+val_name = '-'.join(str(n) for n in sorted(args.valid_nums)) if args.valid_nums else ''
+path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_{val_name}_t{args.threshold:.3f}.png")
+plt.savefig(path)
 
 
 

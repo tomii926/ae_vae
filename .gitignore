@@ -139,3 +139,6 @@ FashionMNIST/
 
 # trained network
 trained_net/
+
+# tables
+tables/
