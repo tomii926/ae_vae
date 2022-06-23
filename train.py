@@ -13,7 +13,7 @@ from net import AE, VAE
 
 parser = ArgumentParser()
 parser.add_argument('--nepoch', type=int, help="number of epochs to train for", default=50)
-parser.add_argument('--nz', type=int, help='size of the latent z vector', default=20)
+parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
 parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model will be trained by only this number.")

@@ -15,7 +15,7 @@ device = device()
 
 parser = ArgumentParser()
 parser.add_argument('--nepoch', type=int, help="which epochs to generate image", default=50)
-parser.add_argument('--nz', type=int, help='size of the latent z vector', default=20)
+parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
 parser.add_argument('-t', '--test-nums', type=int, nargs="*", help="which number(s) to use in test.")
