@@ -16,6 +16,7 @@ class SingleMNIST(Dataset):
         dataloader = DataLoader(self.dataset, batch_size=64, shuffle=False, num_workers=2)
         now = 0
         self.indices = []
+        print('loading partial MNIST ...')
         for _, labels in tqdm(dataloader):
             self.indices += [i for i, label in enumerate(labels, now) if label in numbers]
             now += len(labels)

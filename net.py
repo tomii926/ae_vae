@@ -73,7 +73,7 @@ class VAE(nn.Module):
         mean, std = self._encoder(x)
         z = self._sample_z(mean, std)
         x = self._decoder(z)
-        return x, z
+        return x
 
     def loss(self, x):
         mean, std = self._encoder(x)

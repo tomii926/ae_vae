@@ -7,9 +7,9 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.utils import save_image
 
-from common import device, net_path
-from dataset import transform, SingleMNIST
-from net import AE
+from common import device, mkdir_if_not_exists, net_path
+from dataset import SingleMNIST, transform
+from net import AE, VAE
 
 device = device()
 
@@ -28,8 +28,10 @@ else:
 
 testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
 
-
-net = AE(args.nz)
+if args.vae:
+    net = VAE(args.nz)
+else:
+    net = AE(args.nz)
 net.to(device)
 net.eval()
 
@@ -41,7 +43,8 @@ images = images.to(device)
 def image_path(epoch, nz, vae, real, input_numbers, test_numbers):
     input_name = '-'.join(str(n) for n in sorted(input_numbers)) if input_numbers else ''
     test_name = '-'.join(str(n) for n in sorted(test_numbers)) if test_numbers else ''
-    return f"images/{'v' if vae else ''}ae_{input_name}_{test_name}_z{nz:03d}_e{epoch+1:04d}_{'real' if real else 'fake'}.png"
+    base_dir = mkdir_if_not_exists(f"images/{'vae' if vae else 'ae'}/{input_name}_{test_name}")
+    return os.path.join(base_dir, f"z{nz:03d}_e{epoch+1:04d}_{'real' if real else 'fake'}.png")
 
 save_image(images.view(-1, 1, 28, 28), image_path(args.nepoch - 1, args.nz, args.vae, True, args.input_nums, args.test_nums))
 reconst = net(images)
