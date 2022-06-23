@@ -1,12 +1,6 @@
-from turtle import forward
 import torch
 from torch import nn
 import torch.nn.functional as F
-
-
-# torch.log(0)によるnanを防ぐ
-def torch_log(x):
-    return torch.log(torch.clamp(x, min=1e-10))
 
 
 class AE(nn.Module):
@@ -40,12 +34,10 @@ class AE(nn.Module):
 class VAE(nn.Module):
     def __init__(self, z_dim):
         super(VAE, self).__init__()
-        # Encoder, xを入力にガウス分布のパラメータmu, sigmaを出力
         self.dense_enc1 = nn.Linear(28*28, 200)
         self.dense_enc2 = nn.Linear(200, 200)
         self.dense_encmean = nn.Linear(200, z_dim)
-        self.dense_encvar = nn.Linear(200, z_dim)
-        # Decoder, zを入力にベルヌーイ分布のパラメータlambdaを出力
+        self.dense_enclogvar = nn.Linear(200, z_dim)  # predict log(σ^2)
         self.dense_dec1 = nn.Linear(z_dim, 200)
         self.dense_dec2 = nn.Linear(200, 200)
         self.dense_dec3 = nn.Linear(200, 28*28)
@@ -54,12 +46,13 @@ class VAE(nn.Module):
         x = F.relu(self.dense_enc1(x))
         x = F.relu(self.dense_enc2(x))
         mean = self.dense_encmean(x)
-        std = F.softplus(self.dense_encvar(x))
-        return mean, std
+        logvar = self.dense_enclogvar(x)
+        return mean, logvar
     
-    def _sample_z(self, mean, std):
+    def _sample_z(self, mean, logvar):
         #再パラメータ化トリック
-        epsilon = torch.randn(mean.shape).to(mean.device)
+        std = torch.exp(0.5 * logvar)
+        epsilon = torch.randn_like(std)
         return mean + std * epsilon
  
     def _decoder(self, z):
@@ -70,21 +63,18 @@ class VAE(nn.Module):
         return x
 
     def forward(self, x):
-        mean, std = self._encoder(x)
-        z = self._sample_z(mean, std)
+        mean, logvar = self._encoder(x)
+        z = self._sample_z(mean, logvar)
         x = self._decoder(z)
         return x
 
     def loss(self, x):
-        mean, std = self._encoder(x)
+        # Reconstruction + KL divergence losses summed over all elements and batch
 
-        # sum latent vector's KL divergence, then calculate avarage in a batch.
-        KL = -0.5 * torch.mean(torch.sum(1 + torch_log(std**2) - mean**2 - std**2, dim=1))
-    
-        z = self._sample_z(mean, std)
+        mean, logvar = self._encoder(x)
+        KL = -0.5 * torch.sum(1 + logvar - mean**2 - logvar.exp())
+        z = self._sample_z(mean, logvar)
         y = self._decoder(z)
+        reconstruction = F.binary_cross_entropy(y, x, reduction="sum")
 
-        # sum every pixel's bce loss, then calculate avarage in a batch.
-        reconstruction = F.binary_cross_entropy(y, x, reduction="sum") / x.size()[0]
-
-        return KL, reconstruction 
+        return KL , reconstruction
