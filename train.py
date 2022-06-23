@@ -10,6 +10,7 @@ from common import device, net_path
 from dataset import SingleMNIST
 from net import AE, VAE
 from torchvision.transforms import ToTensor
+import numpy as np
 
 parser = ArgumentParser()
 parser.add_argument('--nepoch', type=int, help="number of epochs to train for", default=50)
@@ -40,6 +41,8 @@ if args.vae:
     
     for epoch in range(max_epoch):
         losses = []
+        kl_losses = []
+        rec_losses = []
         for images, _ in trainloader:
             images = images.to(device)
 
@@ -51,9 +54,11 @@ if args.vae:
             loss.backward()
             optimizer.step()
 
-            losses.append(loss.item())
+            losses.append(loss.cpu().detach().numpy())
+            kl_losses.append(KL_loss.cpu().detach().numpy())
+            rec_losses.append(reconstruction_loss.cpu().detach().numpy())
 
-        print(f'epoch: {epoch + 1}  Train Lower Bound: {sum(losses)/len(losses)}')
+        print(f'epoch: {epoch + 1}  Train Lower Bound: {np.mean(losses)}, reconstruction:{np.mean(rec_losses)} KL: {np.mean(kl_losses)}')
         torch.save(vae.state_dict(), net_path(epoch, args.nz, True, numbers=args.input_nums))
 
 

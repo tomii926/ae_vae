@@ -172,7 +172,7 @@ class VAE(nn.Module):
         # Reconstruction + KL divergence losses summed over all elements
         # returns avarage within a batch.
         mean, logvar = self._encoder(x)
-        KL = -0.5 * torch.mean(torch.sum(1 + logvar - mean**2 - logvar.exp()))
+        KL = -0.5 * torch.mean(torch.sum(1 + logvar - mean**2 - logvar.exp(), dim=1))
         z = self._sample_z(mean, logvar)
         y = self._decoder(z)
         reconstruction = F.binary_cross_entropy(y, x, reduction="sum") / x.size(0)
@@ -188,3 +188,11 @@ class VAE(nn.Module):
         y = self._decoder(z)
         reconstruction = torch.sum(F.binary_cross_entropy(y, x, reduction="none"), dim=1)
         return KL, reconstruction
+
+
+if __name__ == "__main__":
+    from torchinfo import summary
+    summary(AE(16), (64, 1, 28, 28))
+
+    summary(VAE(16), (64, 1, 28, 28))
+
