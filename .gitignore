@@ -134,5 +134,8 @@ images/
 # MNIST data
 MNIST/
 
+# Fashion-MNIST
+FashionMNIST/
+
 # trained network
 trained_net/
