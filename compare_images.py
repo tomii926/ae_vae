@@ -4,11 +4,12 @@ from tokenize import Single
 
 import torch
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image
 
 from common import device, mkdir_if_not_exists, net_path
 from dataset import SingleMNIST, transform
+from torchvision.transforms import ToTensor
 from net import AE, VAE
 
 device = device()
@@ -20,10 +21,13 @@ parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
 parser.add_argument('-t', '--test-nums', type=int, nargs="*", help="which number(s) to use in test.")
 parser.add_argument('--image-num', type=int, help="how many images to compare.", default=64)
+parser.add_argument('-f', '--fashion', action="store_true", help="use fashion mnist as input.")
 args = parser.parse_args()
 
-if args.test_nums is None:
-    testset = MNIST('.', train=False, download=True, transform=transform)
+if args.fashion:
+    testset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
+elif args.test_nums is None:
+    testset = MNIST('.', train=False, download=True, transform=ToTensor())
 else:
     testset = SingleMNIST(args.test_nums, False)
 
@@ -43,7 +47,7 @@ images = images.to(device)
 
 def image_path(epoch, nz, vae, real, input_numbers, test_numbers):
     input_name = '-'.join(str(n) for n in sorted(input_numbers)) if input_numbers else ''
-    test_name = '-'.join(str(n) for n in sorted(test_numbers)) if test_numbers else ''
+    test_name = 'fashion' if args.fashion else '-'.join(str(n) for n in sorted(test_numbers)) if test_numbers else ''
     base_dir = mkdir_if_not_exists(f"images/{'vae' if vae else 'ae'}/{input_name}_{test_name}")
     return os.path.join(base_dir, f"z{nz:03d}_e{epoch+1:04d}_{'real' if real else 'fake'}.png")
 

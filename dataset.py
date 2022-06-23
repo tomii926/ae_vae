@@ -12,7 +12,7 @@ transform = transforms.Compose([
 
 class SingleMNIST(Dataset):
     def __init__(self, numbers, train=True):
-        self.dataset = MNIST(root='.', train=train, transform=transform, download=True)
+        self.dataset = MNIST(root='.', train=train, transform=transforms.ToTensor(), download=True)
         dataloader = DataLoader(self.dataset, batch_size=64, shuffle=False, num_workers=2)
         now = 0
         self.indices = []

@@ -5,11 +5,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
-from tqdm import tqdm, trange
 
 from common import device, net_path
-from dataset import SingleMNIST, transform
+from dataset import SingleMNIST
 from net import AE, VAE
+from torchvision.transforms import ToTensor
 
 parser = ArgumentParser()
 parser.add_argument('--nepoch', type=int, help="number of epochs to train for", default=50)
@@ -27,9 +27,10 @@ batch_size=64
 if args.input_nums is not None:
     trainset = SingleMNIST(args.input_nums, True)
 else:
-    trainset = MNIST(root='.', train=True, download=True, transform=transform)
+    trainset = MNIST(root='.', train=True, download=True, transform=ToTensor())
 
 trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+
 
 if args.vae:
     vae = VAE(args.nz)
