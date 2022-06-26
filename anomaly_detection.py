@@ -114,7 +114,7 @@ if __name__ == "__main__":
     label = [str(i) for i in range(10)] + ["Fashion"]
     plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz, device), tick_label=label)
     input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
-    path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
+    path = os.path.join(mkdir_if_not_exists(f'graph/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
     plt.title(f"Positive rates of each class when classes of train data are {input_name}")
     plt.xlabel('class')
     plt.ylabel('positive rate')

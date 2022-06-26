@@ -128,6 +128,6 @@ plt.plot(x, val_loss_series, label="val")
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 
-image_path = mkdir_if_not_exists('./images/ae')
+image_path = mkdir_if_not_exists('./graph/ae')
 plt.savefig(os.path.join(image_path, f'learning_curve_nz{args.nz:02d}.png'), bbox_inches='tight')
 

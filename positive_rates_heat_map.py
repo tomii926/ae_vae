@@ -23,7 +23,7 @@ positive_rate_list = [positive_rates([], [i], args.threshold, args.nepoch, args.
 
 plt.figure(figsize = (10,8))
 sns.heatmap(positive_rate_list, annot=True, cmap='Blues_r', xticklabels=[str(i) for i in range(10)] + ['Fasion'])
-path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else 'nokl' if args.no_kl else ''}_t{args.threshold:.3f}.png")
+path = os.path.join(mkdir_if_not_exists(f'graph/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else 'nokl' if args.no_kl else ''}_t{args.threshold:.3f}.png")
 plt.title(f"Positive rates of each class when the classes used for determining threshold are non-iid")
 plt.ylabel('which class is used in determining threshold value')
 plt.xlabel('class')

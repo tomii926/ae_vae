@@ -137,8 +137,8 @@ data/*
 # trained network
 trained_net/*
 
-# tables
-tables/*
+# graph
+graph/*
 
 # except gitkeep
 !.gitkeep
