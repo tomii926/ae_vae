@@ -115,5 +115,7 @@ if __name__ == "__main__":
     input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
     path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
     plt.title(f"Positive rates of each class when classes of train data are {input_name}")
-    plt.savefig(path)
+    plt.xlabel('class')
+    plt.ylabel('positive rate')
+    plt.savefig(path, bbox_inches='tight')
     print(f'The graph was output to {path}')
