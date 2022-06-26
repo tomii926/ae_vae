@@ -152,7 +152,6 @@ class VAE(nn.Module):
         return mean, logvar
     
     def _sample_z(self, mean, logvar):
-        #再パラメータ化トリック
         std = torch.exp(0.5 * logvar)
         epsilon = torch.randn_like(std)
         return mean + std * epsilon
