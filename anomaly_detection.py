@@ -27,86 +27,91 @@ args = parser.parse_args()
 
 device = device(args.gpu_num)
 
-valset = SingleMNIST(args.inputnums, train=True)
-valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
+def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float, epoch: int, vae: bool, nz: int, device=device):
+    """ returns positive rates of each class
+    Args:
+        input_nums(list[int]): which classes the model was trained with.
+        val_nums(list[int]): which classes to use in determining threshold.
+        threshold(float)
+        epoch(int): which epoch the model is trained up to.
+        vae(bool):
+        nz(int): size of latent 
+    """
 
-if args.vae:
-    net = VAE(args.nz)
-else:
-    net = AE(args.nz)
-net.to(device)
-net.eval()
+    valset = SingleMNIST(val_nums, train=True)
+    valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
 
-net.load_state_dict(torch.load(net_path(args.nepoch - 1, args.nz, args.vae, args.inputnums)))
-
-criterion = nn.MSELoss(reduction='none')
-
-print('determining threshold...')
-
-all_losses = []
-for images, label in tqdm(valloader):
-    images = images.to(device)
-    if args.vae:
-        kl, reconst = net.losses(images)
-        loss = kl if args.kl else reconst if args.no_kl else kl + reconst
+    if vae:
+        net = VAE(nz)
     else:
-        output = net(images)
-        loss = torch.sum(criterion(output, images), dim=(1, 2, 3))
-    all_losses += loss.tolist()
+        net = AE(nz)
+    net.to(device)
+    net.eval()
 
-all_losses.sort()
-threshold = all_losses[int(len(all_losses) * args.threshold)]
+    net.load_state_dict(torch.load(net_path(epoch - 1, nz, vae, input_nums)))
 
-print(f"threshold = {threshold}")
+    criterion = nn.MSELoss(reduction='none')
 
-testset = MNIST('.', train=False, download=True, transform=ToTensor())
-testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
+    all_losses = []
+    for images, label in tqdm(valloader, desc='determining threshold'):
+        images = images.to(device)
+        if vae:
+            kl, reconst = net.losses(images)
+            loss = kl + reconst
+        else:
+            output = net(images)
+            loss = torch.sum(criterion(output, images), dim=(1, 2, 3))
+        all_losses += loss.tolist()
 
-positive_num = [0] * 10
-num_num = [0] * 10
+    all_losses.sort()
+    threshold = all_losses[int(len(all_losses) * threshold)]
 
-print('calculating positive rate of MNIST classes')
-for images, labels in tqdm(testloader):
-    images = images.to(device)
-    labels = labels.tolist()
-    if args.vae:
-        kl, reconst = net.losses(images)
-        losses = kl if args.kl else reconst if args.no_kl else kl + reconst
-    else:
-        output = net(images)
-        losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
+    testset = MNIST('.', train=False, download=True, transform=ToTensor())
+    testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
 
-    losses = losses.tolist()
+    positive_num = [0] * 10
+    num_num = [0] * 10
 
-    for loss, label in zip(losses, labels):
-        if loss > threshold:
-            positive_num[label] += 1
-        num_num[label] += 1
+    for images, labels in tqdm(testloader, desc='calculating positive rate of MNIST classes'):
+        images = images.to(device)
+        labels = labels.tolist()
+        if vae:
+            kl, reconst = net.losses(images)
+            losses = kl + reconst
+        else:
+            output = net(images)
+            losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
 
-print('calculating positive rate of Fashion-MNIST')
-fashionset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
-fashionloader = DataLoader(fashionset, batch_size=64, shuffle=False, num_workers=2)
+        losses = losses.tolist()
 
-positive = 0
-for images, _ in tqdm(fashionloader):
-    images = images.to(device)
-    if args.vae:
-        kl, reconst = net.losses(images)
-        losses = kl if args.kl else reconst if args.no_kl else kl + reconst
-    else:
-        output = net(images)
-        losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
+        for loss, label in zip(losses, labels):
+            if loss > threshold:
+                positive_num[label] += 1
+            num_num[label] += 1
 
-    positive += torch.count_nonzero(losses > threshold).item()
+    fashionset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
+    fashionloader = DataLoader(fashionset, batch_size=64, shuffle=False, num_workers=2)
 
-positive_rates = np.array(positive_num)/np.array(num_num)
-positive_rates = np.append(positive_rates, positive/len(fashionset))
+    positive = 0
+    for images, _ in tqdm(fashionloader, desc='calculating positive rate of Fashion-MNIST'):
+        images = images.to(device)
+        if vae:
+            kl, reconst = net.losses(images)
+            losses =  kl + reconst
+        else:
+            output = net(images)
+            losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
 
-print(positive_rates)
+        positive += torch.count_nonzero(losses > threshold).item()
 
-left = np.arange(0, 11)
-label = [str(i) for i in range(10)] + ["Fashion"]
-plt.bar(left, positive_rates, tick_label=label)
-input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
-path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
-plt.savefig(path)
+    positive_rates = np.array(positive_num)/np.array(num_num)
+    return np.append(positive_rates, positive/len(fashionset))
+
+
+if __name__ == "__main__":
+    left = np.arange(0, 11)
+    label = [str(i) for i in range(10)] + ["Fashion"]
+    plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz), tick_label=label)
+    input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
+    path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
+    plt.savefig(path)
