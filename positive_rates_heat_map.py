@@ -7,8 +7,8 @@ import seaborn as sns
 from anomaly_detection import positive_rates
 from common import device, mkdir_if_not_exists
 
-parser = ArgumentParser()
-parser.add_argument('--nepoch', type=int, help="which epochs to generate image", default=50)
+parser = ArgumentParser(description="Create a heatmap of positive rate")
+parser.add_argument('--nepoch', type=int, help="which epoch model to use", default=50)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('--kl', action="store_true", help="use only KL divergence when determining threshold.")

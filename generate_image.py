@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import torch
 from torchvision.utils import save_image
 
-from common import device, mkdir_if_not_exists, net_path
+from common import device, net_path
 from net import VAE
 
 device = device()
