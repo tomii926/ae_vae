@@ -70,9 +70,9 @@ optional arguments:
   -h, --help            show this help message and exit
   --nepoch NEPOCH       which epoch model to use
   --nz NZ               size of the latent z vector
-  --vae                 choose vae model
-  --kl                  use only KL divergence when determining threshold.
-  --no-kl               don't use KL divergence when determining threshold.
+  --vae                 use vae model
+  --kl                  Only KL divergence is used when determining threshold
+  --no-kl               KL divergence is not used in determining the threshold
   -t THRESHOLD, --threshold THRESHOLD
                         threshold
   -g GPU_NUM, --gpu-num GPU_NUM
