@@ -99,7 +99,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
 if __name__ == "__main__":
     parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
     parser.add_argument('inputnums', type=int, nargs="+", help="The model trained by this classes will be used.")
-    parser.add_argument('--nepoch', type=int, help="Which epochs to use for anomaly detection", default=50)
+    parser.add_argument('--nepoch', type=int, help="which epoch model to use for anomaly detection", default=50)
     parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
     parser.add_argument('--vae', action="store_true", help="choose vae model")
     parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold.")

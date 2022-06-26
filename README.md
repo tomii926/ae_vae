@@ -49,7 +49,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --nepoch NEPOCH       Which epochs to use for anomaly detection
+  --nepoch NEPOCH       which epoch model to use for anomaly detection
   --nz NZ               size of the latent z vector
   --vae                 choose vae model
   --no-kl               KL divergence is not used in determining the threshold.
