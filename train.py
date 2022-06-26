@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
-from torchvision.transforms import ToTensor
+from torchvision import transforms
 
 from common import device, mkdir_if_not_exists, mnist_data_root, net_path
 from dataset import SingleMNIST
@@ -27,13 +27,18 @@ device = device(args.gpu_num)
 max_epoch=args.nepoch
 batch_size=64
 
+transform = transforms.Compose([
+    transforms.RandomRotation(20),
+    transforms.ToTensor()
+])
+
 if args.input_nums is not None:
-    trainset = SingleMNIST(args.input_nums, True)
+    trainset = SingleMNIST(args.input_nums, True, transform=transform)
 else:
-    trainset = MNIST(root=mnist_data_root, train=True, download=True, transform=ToTensor())
+    trainset = MNIST(root=mnist_data_root, train=True, download=True, transform=transform)
 
 trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-valset = MNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
+valset = MNIST(mnist_data_root, train=False, download=True, transform=transforms.ToTensor())
 valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
 
 train_loss_series = []
@@ -61,10 +66,9 @@ if args.vae:
             loss.backward()
             optimizer.step()
 
-            losses.append(loss.cpu().detach().numpy())
-            kl_losses.append(KL_loss.cpu().detach().numpy())
-            rec_losses.append(reconstruction_loss.cpu().detach().numpy())
-            print(losses, kl_losses, rec_losses)
+            losses.append(loss.item())
+            kl_losses.append(KL_loss.item())
+            rec_losses.append(reconstruction_loss.item())
 
         vae.eval()
         val_losses = []
@@ -128,6 +132,6 @@ plt.plot(x, val_loss_series, label="val")
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 
-image_path = mkdir_if_not_exists('./graph/ae')
+image_path = mkdir_if_not_exists(f'./graph/{"v" if args.vae else ""}ae')
 plt.savefig(os.path.join(image_path, f'learning_curve_nz{args.nz:02d}.png'), bbox_inches='tight')
 
