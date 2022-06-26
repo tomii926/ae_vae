@@ -7,20 +7,20 @@ from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image
 
 from common import device, mkdir_if_not_exists, net_path, mnist_data_root
-from dataset import PartialMNIST, transform
+from dataset import PartialMNIST
 from torchvision.transforms import ToTensor
 from net import AE, VAE
 
 device = device()
 
-parser = ArgumentParser()
-parser.add_argument('--nepoch', type=int, help="which epochs to generate image", default=50)
+parser = ArgumentParser(description="reconstruct images from test dataset")
+parser.add_argument('--nepoch', type=int, help="which epoch model to use for reconstruction", default=50)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
-parser.add_argument('--vae', action="store_true", help="choose vae model")
-parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
-parser.add_argument('-t', '--test-nums', type=int, nargs="*", help="which number(s) to use in test.")
-parser.add_argument('--image-num', type=int, help="how many images to compare.", default=64)
-parser.add_argument('-f', '--fashion', action="store_true", help="use fashion mnist as input.")
+parser.add_argument('--vae', action="store_true", help="use vae model")
+parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="The model trained with these classes will be used.")
+parser.add_argument('-t', '--test-nums', type=int, nargs="*", help="which classes to reconstruct")
+parser.add_argument('--image-num', type=int, help="how many images to reconstruct", default=64)
+parser.add_argument('-f', '--fashion', action="store_true", help="use Fashion-MNIST for reconstruction")
 args = parser.parse_args()
 
 if args.fashion:
