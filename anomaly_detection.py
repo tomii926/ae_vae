@@ -16,7 +16,7 @@ from net import AE, VAE
 
 device = device()
 
-parser = ArgumentParser()
+parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
 parser.add_argument('--nepoch', type=int, help="which epochs to generate image", default=50)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="choose vae model")
