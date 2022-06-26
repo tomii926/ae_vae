@@ -14,20 +14,7 @@ from common import device, mkdir_if_not_exists, net_path
 from dataset import SingleMNIST
 from net import AE, VAE
 
-parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
-parser.add_argument('inputnums', type=int, nargs="+", help="The model trained by this classes will be used.")
-parser.add_argument('--nepoch', type=int, help="Which epochs to use for anomaly detection", default=50)
-parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
-parser.add_argument('--vae', action="store_true", help="choose vae model")
-parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold.")
-parser.add_argument('--kl', action="store_true", help="Only KL divergence is used when determining threshold.")
-parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
-parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
-args = parser.parse_args()
-
-device = device(args.gpu_num)
-
-def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float, epoch: int, vae: bool, nz: int, device=device):
+def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float, epoch: int, vae: bool, nz: int, device: str):
     """ returns positive rates of each class
     Args:
         input_nums(list[int]): which classes the model was trained with.
@@ -109,9 +96,22 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
 
 
 if __name__ == "__main__":
+    parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
+    parser.add_argument('inputnums', type=int, nargs="+", help="The model trained by this classes will be used.")
+    parser.add_argument('--nepoch', type=int, help="Which epochs to use for anomaly detection", default=50)
+    parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
+    parser.add_argument('--vae', action="store_true", help="choose vae model")
+    parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold.")
+    parser.add_argument('--kl', action="store_true", help="Only KL divergence is used when determining threshold.")
+    parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
+    parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
+    args = parser.parse_args()
+
+    device = device(args.gpu_num)
+
     left = np.arange(0, 11)
     label = [str(i) for i in range(10)] + ["Fashion"]
-    plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz), tick_label=label)
+    plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz, device), tick_label=label)
     input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
     path = os.path.join(mkdir_if_not_exists(f'tables/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
     plt.title(f"Positive rates of each class when classes of train data are {input_name}")
