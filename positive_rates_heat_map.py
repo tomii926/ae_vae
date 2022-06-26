@@ -11,8 +11,6 @@ parser = ArgumentParser(description="Create a heatmap of positive rate")
 parser.add_argument('--nepoch', type=int, help="which epoch model to use", default=50)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="use vae model")
-parser.add_argument('--kl', action="store_true", help="Only KL divergence is used when determining threshold")
-parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold")
 parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
 parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
 args = parser.parse_args()
@@ -24,11 +22,11 @@ positive_rate_list = [positive_rates([], [i], args.threshold, args.nepoch, args.
 plt.figure(figsize = (10,8))
 sns.heatmap(positive_rate_list, annot=True, cmap='Blues_r', xticklabels=[str(i) for i in range(10)] + ['Fasion'])
 path = os.path.join(mkdir_if_not_exists(f'graph/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else 'nokl' if args.no_kl else ''}_t{args.threshold:.3f}.png")
-plt.title(f"Positive rates of each class when the classes used for determining threshold are non-iid")
-plt.ylabel('which class is used in determining threshold value')
+plt.title(f"Positive rates (threshold: {args.threshold * 100:.1f}%)")
+plt.ylabel('The class used for determining threshold')
 plt.xlabel('class')
 plt.savefig(path, bbox_inches='tight')
-print(f'The graph was output to {path}')
+print(f'Image saved {path}')
 
 
 

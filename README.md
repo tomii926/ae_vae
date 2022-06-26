@@ -40,7 +40,7 @@ optional arguments:
 
 ### Anomaly detection
 ```
-usage: anomaly_detection.py [-h] [--nepoch NEPOCH] [--nz NZ] [--vae] [--no-kl] [--kl] [-t THRESHOLD] [-g GPU_NUM] inputnums [inputnums ...]
+usage: anomaly_detection.py [-h] [--nepoch NEPOCH] [--nz NZ] [--vae] [-t THRESHOLD] [-g GPU_NUM] inputnums [inputnums ...]
 
 Anomaly detection when trained with partial MNIST classes.
 
@@ -52,8 +52,6 @@ optional arguments:
   --nepoch NEPOCH       which epoch model to use for anomaly detection
   --nz NZ               size of the latent z vector
   --vae                 choose vae model
-  --no-kl               KL divergence is not used in determining the threshold.
-  --kl                  Only KL divergence is used when determining threshold.
   -t THRESHOLD, --threshold THRESHOLD
                         threshold
   -g GPU_NUM, --gpu-num GPU_NUM
@@ -62,7 +60,7 @@ optional arguments:
 
 ### Anomaly detection with threshold determined by non-IID data
 ```
-usage: positive_rates_heat_map.py [-h] [--nepoch NEPOCH] [--nz NZ] [--vae] [--kl] [--no-kl] [-t THRESHOLD] [-g GPU_NUM]
+usage: positive_rates_heat_map.py [-h] [--nepoch NEPOCH] [--nz NZ] [--vae] [-t THRESHOLD] [-g GPU_NUM]
 
 Create a heatmap of positive rate
 
@@ -71,8 +69,6 @@ optional arguments:
   --nepoch NEPOCH       which epoch model to use
   --nz NZ               size of the latent z vector
   --vae                 use vae model
-  --kl                  Only KL divergence is used when determining threshold
-  --no-kl               KL divergence is not used in determining the threshold
   -t THRESHOLD, --threshold THRESHOLD
                         threshold
   -g GPU_NUM, --gpu-num GPU_NUM
