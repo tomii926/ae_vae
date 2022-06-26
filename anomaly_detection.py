@@ -17,10 +17,10 @@ from net import AE, VAE
 device = device()
 
 parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
-parser.add_argument('--nepoch', type=int, help="which epochs to generate image", default=50)
+parser.add_argument('--nepoch', type=int, help="Which epochs to use for anomaly detection", default=50)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="choose vae model")
-parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
+parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="The model trained by this classes will be used.")
 parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold.")
 parser.add_argument('--kl', action="store_true", help="Only KL divergence is used when determining threshold.")
 parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
