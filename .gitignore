@@ -141,4 +141,7 @@ FashionMNIST/
 trained_net/
 
 # tables
-tables/
+tables/*
+
+# except gitkeep
+!.gitkeep
