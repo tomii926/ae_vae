@@ -11,7 +11,7 @@ from torchvision.datasets import MNIST
 from torchvision import transforms
 
 from common import device, mkdir_if_not_exists, mnist_data_root, net_path
-from dataset import SingleMNIST
+from dataset import PartialMNIST
 from net import AE, VAE
 
 parser = ArgumentParser()
@@ -33,7 +33,7 @@ transform = transforms.Compose([
 ])
 
 if args.input_nums is not None:
-    trainset = SingleMNIST(args.input_nums, True, transform=transform)
+    trainset = PartialMNIST(args.input_nums, True, transform=transform)
 else:
     trainset = MNIST(root=mnist_data_root, train=True, download=True, transform=transform)
 

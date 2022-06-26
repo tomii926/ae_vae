@@ -7,7 +7,7 @@ from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image
 
 from common import device, mkdir_if_not_exists, net_path, mnist_data_root
-from dataset import SingleMNIST, transform
+from dataset import PartialMNIST, transform
 from torchvision.transforms import ToTensor
 from net import AE, VAE
 
@@ -28,7 +28,7 @@ if args.fashion:
 elif args.test_nums is None:
     testset = MNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
 else:
-    testset = SingleMNIST(args.test_nums, False)
+    testset = PartialMNIST(args.test_nums, False)
 
 testloader = DataLoader(testset, batch_size=args.image_num, shuffle=False, num_workers=2)
 

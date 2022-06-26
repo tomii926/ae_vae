@@ -11,7 +11,7 @@ from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
 from common import device, mkdir_if_not_exists, mnist_data_root, net_path
-from dataset import SingleMNIST
+from dataset import PartialMNIST
 from net import AE, VAE
 
 
@@ -26,7 +26,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
         nz(int): size of latent 
     """
 
-    valset = SingleMNIST(val_nums, train=True)
+    valset = PartialMNIST(val_nums, train=True)
     valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
 
     if vae:
