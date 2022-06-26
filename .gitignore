@@ -129,13 +129,13 @@ dmypy.json
 .pyre/
 
 # images folder
-images/
+images/*
 
 # MNIST data
 data/*
 
 # trained network
-trained_net/
+trained_net/*
 
 # tables
 tables/*
