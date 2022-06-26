@@ -6,7 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 
-from common import device, net_path
+from common import device, net_path, mnist_data_root
 from dataset import SingleMNIST
 from net import AE, VAE
 from torchvision.transforms import ToTensor
@@ -28,7 +28,7 @@ batch_size=64
 if args.input_nums is not None:
     trainset = SingleMNIST(args.input_nums, True)
 else:
-    trainset = MNIST(root='.', train=True, download=True, transform=ToTensor())
+    trainset = MNIST(root=mnist_data_root, train=True, download=True, transform=ToTensor())
 
 trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
 

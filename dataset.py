@@ -1,9 +1,12 @@
 from threading import local
+
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from tqdm import tqdm
+
+from common import mnist_data_root
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -12,7 +15,7 @@ transform = transforms.Compose([
 
 class SingleMNIST(Dataset):
     def __init__(self, numbers, train=True):
-        self.dataset = MNIST(root='.', train=train, transform=transforms.ToTensor(), download=True)
+        self.dataset = MNIST(root=mnist_data_root, train=train, transform=transforms.ToTensor(), download=True)
         dataloader = DataLoader(self.dataset, batch_size=64, shuffle=False, num_workers=2)
         now = 0
         self.indices = []

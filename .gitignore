@@ -132,10 +132,7 @@ dmypy.json
 images/
 
 # MNIST data
-MNIST/
-
-# Fashion-MNIST
-FashionMNIST/
+data/*
 
 # trained network
 trained_net/

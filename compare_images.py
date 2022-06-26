@@ -1,13 +1,12 @@
 import os
 from argparse import ArgumentParser
-from tokenize import Single
 
 import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.utils import save_image
 
-from common import device, mkdir_if_not_exists, net_path
+from common import device, mkdir_if_not_exists, net_path, mnist_data_root
 from dataset import SingleMNIST, transform
 from torchvision.transforms import ToTensor
 from net import AE, VAE
@@ -25,9 +24,9 @@ parser.add_argument('-f', '--fashion', action="store_true", help="use fashion mn
 args = parser.parse_args()
 
 if args.fashion:
-    testset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
+    testset = FashionMNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
 elif args.test_nums is None:
-    testset = MNIST('.', train=False, download=True, transform=ToTensor())
+    testset = MNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
 else:
     testset = SingleMNIST(args.test_nums, False)
 

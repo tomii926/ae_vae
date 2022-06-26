@@ -10,9 +10,10 @@ from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
-from common import device, mkdir_if_not_exists, net_path
+from common import device, mkdir_if_not_exists, mnist_data_root, net_path
 from dataset import SingleMNIST
 from net import AE, VAE
+
 
 def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float, epoch: int, vae: bool, nz: int, device: str):
     """ returns positive rates of each class
@@ -53,7 +54,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
     all_losses.sort()
     threshold = all_losses[int(len(all_losses) * threshold)]
 
-    testset = MNIST('.', train=False, download=True, transform=ToTensor())
+    testset = MNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
     testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
 
     positive_num = [0] * 10
@@ -76,7 +77,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
                 positive_num[label] += 1
             num_num[label] += 1
 
-    fashionset = FashionMNIST('.', train=False, download=True, transform=ToTensor())
+    fashionset = FashionMNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
     fashionloader = DataLoader(fashionset, batch_size=64, shuffle=False, num_workers=2)
 
     positive = 0
