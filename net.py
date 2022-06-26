@@ -22,7 +22,8 @@ class AE(nn.Module):
             nn.Conv2d(128, 256, 3, stride=1, padding=1),  # b, 256, 7, 7
             nn.BatchNorm2d(256),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2)  # b, 256, 3, 3
+            nn.MaxPool2d(2),  # b, 256, 3, 3
+            nn.Dropout(0.2)
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(256, 512, 3, stride=1, padding=0),  # b, 512, 1, 1
@@ -50,6 +51,7 @@ class AE(nn.Module):
             nn.ConvTranspose2d(128, 64, 4, stride=2, padding = 1),  # b, 64, 14, 14
             nn.BatchNorm2d(64),
             nn.LeakyReLU(),
+            nn.Dropout(0.2)
         )
         self.convTrans4 = nn.Sequential(
             nn.ConvTranspose2d(64, 1, 4, stride=2, padding = 1),  # b, 3, 28, 28
@@ -100,7 +102,8 @@ class VAE(nn.Module):
             nn.Conv2d(128, 256, 3, stride=1, padding=1),  # b, 256, 7, 7
             nn.BatchNorm2d(256),
             nn.LeakyReLU(),
-            nn.MaxPool2d(2)  # b, 256, 3, 3
+            nn.MaxPool2d(2),  # b, 256, 3, 3
+            nn.Dropout(0.2)
         )
         self.conv4 = nn.Sequential(
             nn.Conv2d(256, 512, 3, stride=1, padding=0),  # b, 512, 1, 1
@@ -130,6 +133,7 @@ class VAE(nn.Module):
             nn.ConvTranspose2d(128, 64, 4, stride=2, padding = 1),  # b, 64, 14, 14
             nn.BatchNorm2d(64),
             nn.LeakyReLU(),
+            nn.Dropout(0.2)
         )
         self.convTrans4 = nn.Sequential(
             nn.ConvTranspose2d(64, 1, 4, stride=2, padding = 1),  # b, 1, 28, 28
