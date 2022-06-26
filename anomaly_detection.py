@@ -22,7 +22,8 @@ parser.add_argument('--nz', type=int, help='size of the latent z vector', defaul
 parser.add_argument('--vae', action="store_true", help="choose vae model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="if this argument is specified, the model trained by this number(s) will be used.")
 parser.add_argument('-v', '--valid-nums', type=int, nargs="*", help="which classes to use in determining threshold. if not specified, this will be the same as input-nums")
-parser.add_argument('--kl', action="store_true", help="use only KL divergence when determining threshold.")
+parser.add_argument('--no-kl', action="store_true", help="KL divergence is not used in determining the threshold.")
+parser.add_argument('--kl', action="store_true", help="Only KL divergence is used when determining threshold.")
 parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
 args = parser.parse_args()
 
@@ -53,7 +54,7 @@ for images, label in tqdm(valloader):
     images = images.to(device)
     if args.vae:
         kl, reconst = net.losses(images)
-        loss = reconst if args.kl else kl + reconst
+        loss = kl if args.kl else reconst if args.no_kl else kl + reconst
     else:
         output = net(images)
         loss = torch.sum(criterion(output, images), dim=(1, 2, 3))
@@ -76,7 +77,7 @@ for images, labels in tqdm(testloader):
     labels = labels.tolist()
     if args.vae:
         kl, reconst = net.losses(images)
-        losses = reconst if args.kl else kl + reconst
+        losses = kl if args.kl else reconst if args.no_kl else kl + reconst
     else:
         output = net(images)
         losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
@@ -96,7 +97,7 @@ for images, _ in tqdm(fashionloader):
     images = images.to(device)
     if args.vae:
         kl, reconst = net.losses(images)
-        losses = reconst if args.kl else kl + reconst
+        losses = kl if args.kl else reconst if args.no_kl else kl + reconst
     else:
         output = net(images)
         losses = torch.sum(criterion(output, images), dim=(1, 2, 3))
