@@ -27,15 +27,3 @@ plt.ylabel('The class used for determining threshold')
 plt.xlabel('class')
 plt.savefig(path, bbox_inches='tight')
 print(f'Image saved {path}')
-
-
-
-
-
-
-    
-
-
-
-
-

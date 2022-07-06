@@ -1,6 +1,3 @@
-from threading import local
-
-import numpy as np
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import MNIST
