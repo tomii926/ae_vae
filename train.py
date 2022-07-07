@@ -21,6 +21,7 @@ parser.add_argument('--nz', type=int, help='size of the latent z vector', defaul
 parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
 parser.add_argument('--vae', action="store_true", help="train VAE model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="Classes used for training model")
+parser.add_argument('--aug', action="store_true", help="use augmented data for training")
 args = parser.parse_args()
 
 device = device(args.gpu_num)
@@ -28,10 +29,13 @@ device = device(args.gpu_num)
 max_epoch=args.nepoch
 batch_size=256
 
-transform = transforms.Compose([
-    transforms.RandomRotation(20),
-    transforms.ToTensor()
-])
+if args.aug:
+    transform = transforms.Compose([
+        transforms.RandomRotation(20),
+        transforms.ToTensor()
+    ])
+else:
+    transform = transforms.ToTensor()
 
 if args.input_nums is not None:
     trainset = PartialMNIST(args.input_nums, True, transform=transform)
@@ -80,7 +84,7 @@ if args.vae:
             val_losses.append(loss.item())
 
         print(f'epoch: {epoch + 1} reconstruction:{np.mean(rec_losses)} KL: {np.mean(kl_losses)}  Train Lower Bound: {np.mean(losses)}, Val Lower Bound: {np.mean(val_losses)}')
-        torch.save(vae.state_dict(), net_path(epoch, args.nz, True, numbers=args.input_nums))
+        torch.save(vae.state_dict(), net_path(epoch, args.nz, True, numbers=args.input_nums, augmented=args.aug))
 
         train_loss_series.append(np.mean(losses))
         val_loss_series.append(np.mean(val_losses))
@@ -118,7 +122,7 @@ else: # autoencoder
             val_losses.append(loss.item())
 
         print(f'epoch: {epoch + 1}  Train loss: {np.mean(losses)}  Val loss: {np.mean(val_losses)}')
-        torch.save(ae.state_dict(), net_path(epoch, args.nz, False, numbers=args.input_nums))
+        torch.save(ae.state_dict(), net_path(epoch, args.nz, False, numbers=args.input_nums, augmented=args.aug))
 
         train_loss_series.append(np.mean(losses))
         val_loss_series.append(np.mean(val_losses))

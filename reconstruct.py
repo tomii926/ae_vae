@@ -21,6 +21,7 @@ parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="The model t
 parser.add_argument('-t', '--test-nums', type=int, nargs="*", help="which classes to reconstruct")
 parser.add_argument('--image-num', type=int, help="how many images to reconstruct", default=64)
 parser.add_argument('-f', '--fashion', action="store_true", help="use Fashion-MNIST for reconstruction")
+parser.add_argument('--aug', action="store_true", help="model which used data augmentation")
 args = parser.parse_args()
 
 if args.fashion:
@@ -39,19 +40,19 @@ else:
 net.to(device)
 net.eval()
 
-net.load_state_dict(torch.load(net_path(args.nepoch - 1, args.nz, args.vae, args.input_nums)))
+net.load_state_dict(torch.load(net_path(args.nepoch - 1, args.nz, args.vae, args.input_nums, args.aug)))
 
 images, _ = iter(testloader).__next__()
 images = images.to(device)
 
-def image_path(epoch, nz, vae, real, input_numbers, test_numbers):
+def image_path(epoch, nz, vae, real, input_numbers, test_numbers, augmented):
     input_name = '-'.join(str(n) for n in sorted(input_numbers)) if input_numbers else ''
     test_name = 'fashion' if args.fashion else '-'.join(str(n) for n in sorted(test_numbers)) if test_numbers else ''
     base_dir = mkdir_if_not_exists(f"images/{'vae' if vae else 'ae'}/{input_name}_{test_name}")
-    return os.path.join(base_dir, f"z{nz:03d}_e{epoch+1:04d}_{'real' if real else 'fake'}.png")
+    return os.path.join(base_dir, f"{'aug_' if augmented else ''}z{nz:03d}_e{epoch+1:04d}_{'real' if real else 'fake'}.png")
 
-save_image(images.view(-1, 1, 28, 28), image_path(args.nepoch - 1, args.nz, args.vae, True, args.input_nums, args.test_nums), pad_value=1)
+save_image(images.view(-1, 1, 28, 28), image_path(args.nepoch - 1, args.nz, args.vae, True, args.input_nums, args.test_nums, args.aug), pad_value=1)
 reconst = net(images)
-save_image(reconst.view(-1, 1, 28, 28), image_path(args.nepoch - 1, args.nz, args.vae, False, args.input_nums, args.test_nums), pad_value=1)
+save_image(reconst.view(-1, 1, 28, 28), image_path(args.nepoch - 1, args.nz, args.vae, False, args.input_nums, args.test_nums, args.aug), pad_value=1)
 
 
