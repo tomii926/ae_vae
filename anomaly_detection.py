@@ -15,7 +15,7 @@ from dataset import PartialMNIST
 from net import AE, VAE
 
 
-def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float, epoch: int, vae: bool, nz: int, augmented: bool, device: str):
+def positive_rates(input_nums, val_nums, threshold: float, epoch: int, vae: bool, nz: int, augmented: bool, device: str):
     """ returns positive rates of each class
     Args:
         input_nums(list[int]): which classes the model was trained with.
