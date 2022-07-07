@@ -7,8 +7,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
 from torchvision import transforms
+from torchvision.datasets import MNIST
+from tqdm import tqdm
 
 from common import device, mkdir_if_not_exists, mnist_data_root, net_path
 from dataset import PartialMNIST
@@ -39,7 +40,7 @@ else:
 
 trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
 valset = MNIST(mnist_data_root, train=False, download=True, transform=transforms.ToTensor())
-valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
+valloader = DataLoader(valset, batch_size=batch_size, shuffle=False, num_workers=2)
 
 train_loss_series = []
 val_loss_series = []
@@ -95,7 +96,7 @@ else: # autoencoder
     for epoch in range(max_epoch,):
         ae.train()
         losses = []
-        for images, _ in trainloader:
+        for images, _ in tqdm(trainloader, leave=False, desc="train"):
             images = images.to(device)
 
             optimizer.zero_grad()
@@ -110,7 +111,7 @@ else: # autoencoder
 
         ae.eval()
         val_losses = []
-        for images, _ in valloader:
+        for images, _ in tqdm(valloader, leave=False, desc="val"):
             images = images.to(device)
             output = ae(images)
             loss = criterion(output, images)
