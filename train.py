@@ -60,7 +60,7 @@ if args.vae:
         kl_losses = []
         rec_losses = []
 
-        for images, _ in trainloader:
+        for images, _ in tqdm(trainloader):
             images = images.to(device)
 
             optimizer.zero_grad()
@@ -77,7 +77,7 @@ if args.vae:
 
         vae.eval()
         val_losses = []
-        for images, _ in valloader:
+        for images, _ in tqdm(valloader):
             images = images.to(device)
             KL_loss, reconstruction_loss = vae.loss(images)
             loss = KL_loss + reconstruction_loss
