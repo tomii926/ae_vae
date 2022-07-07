@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+torchvision = "*"
+torch = "*"
+matplotlib = "*"
+seaborn = "*"
+tqdm = "*"
+torchinfo = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
