@@ -25,7 +25,7 @@ args = parser.parse_args()
 device = device(args.gpu_num)
 
 max_epoch=args.nepoch
-batch_size=64
+batch_size=256
 
 transform = transforms.Compose([
     transforms.RandomRotation(20),

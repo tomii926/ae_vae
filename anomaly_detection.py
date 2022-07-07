@@ -27,7 +27,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
     """
 
     valset = PartialMNIST(val_nums, train=True)
-    valloader = DataLoader(valset, batch_size=64, shuffle=False, num_workers=2)
+    valloader = DataLoader(valset, batch_size=256, shuffle=False, num_workers=2)
 
     if vae:
         net = VAE(nz)
@@ -55,7 +55,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
     threshold = all_losses[int(len(all_losses) * threshold)]
 
     testset = MNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
-    testloader = DataLoader(testset, batch_size=64, shuffle=False, num_workers=2)
+    testloader = DataLoader(testset, batch_size=256, shuffle=False, num_workers=2)
 
     positive_num = [0] * 10
     num_num = [0] * 10
@@ -78,7 +78,7 @@ def positive_rates(input_nums: list[int], val_nums: list[int], threshold: float,
             num_num[label] += 1
 
     fashionset = FashionMNIST(mnist_data_root, train=False, download=True, transform=ToTensor())
-    fashionloader = DataLoader(fashionset, batch_size=64, shuffle=False, num_workers=2)
+    fashionloader = DataLoader(fashionset, batch_size=256, shuffle=False, num_workers=2)
 
     positive = 0
     for images, _ in tqdm(fashionloader, desc='calculating positive rate of Fashion-MNIST'):

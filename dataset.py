@@ -9,7 +9,7 @@ from common import mnist_data_root
 class PartialMNIST(Dataset):
     def __init__(self, numbers, train=True, transform=transforms.ToTensor()):
         self.dataset = MNIST(root=mnist_data_root, train=train, transform=transform, download=True)
-        dataloader = DataLoader(self.dataset, batch_size=64, shuffle=False, num_workers=2)
+        dataloader = DataLoader(self.dataset, batch_size=256, shuffle=False, num_workers=2)
         now = 0
         self.indices = []
         print('loading partial MNIST ...')
