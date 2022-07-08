@@ -99,20 +99,21 @@ def positive_rates(input_nums, val_nums, threshold: float, epoch: int, vae: bool
 if __name__ == "__main__":
     parser = ArgumentParser(description="Anomaly detection when trained with partial MNIST classes.")
     parser.add_argument('inputnums', type=int, nargs="+", help="The model trained by this classes will be used.")
-    parser.add_argument('--nepoch', type=int, help="which epoch model to use for anomaly detection", default=50)
+    parser.add_argument('--nepoch', type=int, help="which epoch model to use for anomaly detection", default=200)
     parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
     parser.add_argument('--vae', action="store_true", help="choose vae model")
     parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
     parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
+    parser.add_argument('--aug', action="store_true", help="use model trained with data augmentation")
     args = parser.parse_args()
 
     device = device(args.gpu_num)
 
     left = np.arange(0, 11)
     label = [str(i) for i in range(10)] + ["Fashion"]
-    plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz, device), tick_label=label)
+    plt.bar(left, positive_rates(args.inputnums, args.inputnums, args.threshold, args.nepoch, args.vae, args.nz, args.aug, device), tick_label=label)
     input_name = '-'.join(str(n) for n in sorted(args.inputnums)) if args.inputnums else ''
-    path = os.path.join(mkdir_if_not_exists(f'graph/{"v" if args.vae else ""}ae'), f"{'onlykl' if args.kl else ''}{input_name}_t{args.threshold:.3f}.png")
+    path = os.path.join(mkdir_if_not_exists(f'graph/{"v" if args.vae else ""}ae'), f"{input_name}_t{args.threshold:.3f}.png")
     plt.title(f"Positive rates (Trained classes: {input_name})")
     plt.xlabel('class')
     plt.ylabel('positive rate')

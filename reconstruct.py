@@ -14,7 +14,7 @@ from net import AE, VAE
 device = device()
 
 parser = ArgumentParser(description="Reconstruct images from test dataset")
-parser.add_argument('--nepoch', type=int, help="which epoch model to use for reconstruction", default=50)
+parser.add_argument('--nepoch', type=int, help="which epoch model to use for reconstruction", default=200)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="use VAE model")
 parser.add_argument('-i', '--input-nums', type=int, nargs="*", help="The model trained with these classes will be used.")
