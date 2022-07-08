@@ -16,7 +16,7 @@ from dataset import PartialMNIST
 from net import AE, VAE
 
 parser = ArgumentParser(description="Train model")
-parser.add_argument('--nepoch', type=int, help="number of epochs to train for", default=50)
+parser.add_argument('--nepoch', type=int, help="number of epochs to train for", default=200)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
 parser.add_argument('--vae', action="store_true", help="train VAE model")
@@ -43,11 +43,11 @@ else:
     trainset = MNIST(root=mnist_data_root, train=True, download=True, transform=transform)
 
 trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-valset = MNIST(mnist_data_root, train=False, download=True, transform=transforms.ToTensor())
-valloader = DataLoader(valset, batch_size=batch_size, shuffle=False, num_workers=2)
+testset = MNIST(mnist_data_root, train=False, download=True, transform=transforms.ToTensor())
+testloader = DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
 
 train_loss_series = []
-val_loss_series = []
+test_loss_series = []
 
 if args.vae:
     vae = VAE(args.nz)
@@ -60,14 +60,14 @@ if args.vae:
         kl_losses = []
         rec_losses = []
 
-        for images, _ in tqdm(trainloader):
+        vae.train()
+        for images, _ in tqdm(trainloader, leave=False, desc="train"):
             images = images.to(device)
 
             optimizer.zero_grad()
 
             KL_loss, reconstruction_loss = vae.loss(images)
             loss = KL_loss + reconstruction_loss
-
             loss.backward()
             optimizer.step()
 
@@ -76,18 +76,18 @@ if args.vae:
             rec_losses.append(reconstruction_loss.item())
 
         vae.eval()
-        val_losses = []
-        for images, _ in tqdm(valloader):
+        test_losses = []
+        for images, _ in tqdm(testloader, leave=False, desc="test"):
             images = images.to(device)
             KL_loss, reconstruction_loss = vae.loss(images)
             loss = KL_loss + reconstruction_loss
-            val_losses.append(loss.item())
+            test_losses.append(loss.item())
 
-        print(f'epoch: {epoch + 1} reconstruction:{np.mean(rec_losses)} KL: {np.mean(kl_losses)}  Train Lower Bound: {np.mean(losses)}, Val Lower Bound: {np.mean(val_losses)}')
+        print(f'epoch: {epoch + 1} reconstruction:{np.mean(rec_losses)} KL: {np.mean(kl_losses)}  Train Lower Bound: {np.mean(losses)}, test Lower Bound: {np.mean(test_losses)}')
         torch.save(vae.state_dict(), net_path(epoch, args.nz, True, numbers=args.input_nums, augmented=args.aug))
 
         train_loss_series.append(np.mean(losses))
-        val_loss_series.append(np.mean(val_losses))
+        test_loss_series.append(np.mean(test_losses))
 
 
 else: # autoencoder
@@ -114,18 +114,18 @@ else: # autoencoder
             losses.append(loss.item())
 
         ae.eval()
-        val_losses = []
-        for images, _ in tqdm(valloader, leave=False, desc="val"):
+        test_losses = []
+        for images, _ in tqdm(testloader, leave=False, desc="test"):
             images = images.to(device)
             output = ae(images)
             loss = criterion(output, images)
-            val_losses.append(loss.item())
+            test_losses.append(loss.item())
 
-        print(f'epoch: {epoch + 1}  Train loss: {np.mean(losses)}  Val loss: {np.mean(val_losses)}')
+        print(f'epoch: {epoch + 1}  Train loss: {np.mean(losses)}  test loss: {np.mean(test_losses)}')
         torch.save(ae.state_dict(), net_path(epoch, args.nz, False, numbers=args.input_nums, augmented=args.aug))
 
         train_loss_series.append(np.mean(losses))
-        val_loss_series.append(np.mean(val_losses))
+        test_loss_series.append(np.mean(test_losses))
 
 
 print('Finished Training')
@@ -133,7 +133,7 @@ print('Finished Training')
 plt.title('learning curve')
 x = np.arange(0, args.nepoch)
 plt.plot(x, train_loss_series, label="train")
-plt.plot(x, val_loss_series, label="val")
+plt.plot(x, test_loss_series, label="test")
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 
