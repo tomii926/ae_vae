@@ -8,12 +8,12 @@ from anomaly_detection import positive_rates
 from common import device, mkdir_if_not_exists
 
 parser = ArgumentParser(description="Create a heatmap of positive rate")
-parser.add_argument('--nepoch', type=int, help="which epoch model to use", default=50)
+parser.add_argument('--nepoch', type=int, help="which epoch model to use", default=200)
 parser.add_argument('--nz', type=int, help='size of the latent z vector', default=16)
 parser.add_argument('--vae', action="store_true", help="use vae model")
 parser.add_argument('-t', '--threshold', type=float, help="threshold", default=0.99)
-parser.add_argument('-g', '--gpu-num', type=int, help='what gpu to use', default=0)
-parser.add_argument('--aug', action="store_true", help="model which used data augmentation")
+parser.add_argument('-g', '--gpu-num', type=int, help='which gpu to use', default=0)
+parser.add_argument('--aug', action="store_true", help="use model trained with data augmentation")
 args = parser.parse_args()
 
 device = device(args.gpu_num)
