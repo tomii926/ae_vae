@@ -138,5 +138,4 @@ plt.ylabel('Loss')
 plt.xlabel('Epoch')
 
 image_path = mkdir_if_not_exists(f'./graph/{"v" if args.vae else ""}ae')
-plt.savefig(os.path.join(image_path, f'learning_curve_nz{args.nz:02d}.png'), bbox_inches='tight')
-
+plt.savefig(os.path.join(image_path, f'learning_curve_nz{args.nz:02d}{"_aug" if args.aug else ""}.png'), bbox_inches='tight')
